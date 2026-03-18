@@ -153,6 +153,16 @@ body {
     overflow: hidden;
 }
 
+/* Three.js viewport — fills the game main area */
+#three-viewport {
+    flex: 1;
+    background: #111111;
+    cursor: crosshair;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Retain #game-canvas selector as fallback (unused but harmless) */
 #game-canvas {
     flex: 1;
     background: #1a2a1a;
