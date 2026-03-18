@@ -58,29 +58,51 @@ const ObjectBuilder = {
         return m;
     },
 
+    // RSC NW light source: per-face brightness for BoxGeometry
+    // Face order in Three.js r128 BoxGeometry: +X(east), -X(west), +Y(top), -Y(bot), +Z(south/front), -Z(north/back)
+    // 4 unique vertices per face × 6 faces = 24 total vertices
+    // Contrast increased vs spec baseline for clearly visible face differentiation
+    _applyFaceLighting(geo, baseHex) {
+        const base = new THREE.Color(baseHex);
+        const BRIGHTNESS = [0.65, 0.45, 1.00, 0.15, 0.90, 0.50];
+        const colors = new Float32Array(24 * 3);
+        for (let face = 0; face < 6; face++) {
+            const b = BRIGHTNESS[face];
+            for (let v = 0; v < 4; v++) {
+                const i = (face * 4 + v) * 3;
+                colors[i]   = base.r * b;
+                colors[i+1] = base.g * b;
+                colors[i+2] = base.b * b;
+            }
+        }
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        return geo;
+    },
+
+    _matLit() {
+        return new THREE.MeshBasicMaterial({ vertexColors: true });
+    },
+
+    // Create a lit mesh inline (no geometry cache — each call gets fresh lit geometry)
+    _meshLit(w, h, d, baseHex) {
+        const geo = this._applyFaceLighting(new THREE.BoxGeometry(w, h, d), baseHex);
+        return new THREE.Mesh(geo, this._matLit());
+    },
+
     // ---- Tree ----
     // RSC spec: total height 10-12 units, canopy width 8-10 units
     _tree() {
         const g = new THREE.Group();
-        // Trunk: 0.6 wide × 4.0 tall, base at y=0
-        const trunk = new THREE.Mesh(
-            new THREE.BoxGeometry(0.6, 4.0, 0.6),
-            this._mat(RSC.COL_TREE_TRUNK)
-        );
+        // Trunk: per-face lit (dark sides, lighter top)
+        const trunk = this._meshLit(0.6, 4.0, 0.6, RSC.COL_TREE_TRUNK);
         trunk.position.set(0, 2.0, 0);
         g.add(trunk);
-        // Lower canopy (wide, dark)
-        const can1 = new THREE.Mesh(
-            new THREE.BoxGeometry(8.0, 4.5, 8.0),
-            this._mat(RSC.COL_TREE_CANOPY1)
-        );
+        // Lower canopy — per-face lit (dark sides, bright top)
+        const can1 = this._meshLit(8.0, 4.5, 8.0, RSC.COL_TREE_CANOPY1);
         can1.position.set(0, 6.5, 0);
         g.add(can1);
-        // Upper canopy (narrower, lighter — spherical approximation)
-        const can2 = new THREE.Mesh(
-            new THREE.BoxGeometry(6.0, 3.5, 6.0),
-            this._mat(RSC.COL_TREE_CANOPY2)
-        );
+        // Upper canopy — per-face lit, lighter green
+        const can2 = this._meshLit(6.0, 3.5, 6.0, RSC.COL_TREE_CANOPY2);
         can2.position.set(0, 10.0, 0);
         g.add(can2);
         return g;
@@ -89,22 +111,13 @@ const ObjectBuilder = {
     // ---- Dead Tree ----
     _deadTree() {
         const g = new THREE.Group();
-        const trunk = new THREE.Mesh(
-            new THREE.BoxGeometry(0.4, 5.0, 0.4),
-            this._mat(0x4a3a2a)
-        );
+        const trunk = this._meshLit(0.4, 5.0, 0.4, 0x4a3a2a);
         trunk.position.set(0, 2.5, 0);
         g.add(trunk);
-        const b1 = new THREE.Mesh(
-            new THREE.BoxGeometry(2.5, 0.3, 0.3),
-            this._mat(0x4a3a2a)
-        );
+        const b1 = this._meshLit(2.5, 0.3, 0.3, 0x4a3a2a);
         b1.position.set(-0.5, 3.5, 0);
         g.add(b1);
-        const b2 = new THREE.Mesh(
-            new THREE.BoxGeometry(2.0, 0.3, 0.3),
-            this._mat(0x3a2a1a)
-        );
+        const b2 = this._meshLit(2.0, 0.3, 0.3, 0x3a2a1a);
         b2.position.set(0.4, 2.8, 0);
         b2.rotation.y = 0.8;
         g.add(b2);
@@ -115,16 +128,10 @@ const ObjectBuilder = {
     // RSC spec: BOULDER_R = 1.2 → box ~2.0 wide
     _rock(dark, light) {
         const g = new THREE.Group();
-        const r1 = new THREE.Mesh(
-            new THREE.BoxGeometry(2.0, 1.2, 1.8),
-            this._mat(dark)
-        );
+        const r1 = this._meshLit(2.0, 1.2, 1.8, dark);
         r1.position.set(0, 0.6, 0);
         g.add(r1);
-        const r2 = new THREE.Mesh(
-            new THREE.BoxGeometry(1.4, 0.3, 1.2),
-            this._mat(light)
-        );
+        const r2 = this._meshLit(1.4, 0.3, 1.2, light);
         r2.position.set(-0.2, 1.15, -0.2);
         g.add(r2);
         return g;
@@ -133,10 +140,7 @@ const ObjectBuilder = {
     // ---- Barrel ----
     _barrel() {
         const g = new THREE.Group();
-        const body = new THREE.Mesh(
-            new THREE.BoxGeometry(0.6, 0.8, 0.6),
-            this._mat(RSC.COL_BARREL_BODY)
-        );
+        const body = this._meshLit(0.6, 0.8, 0.6, RSC.COL_BARREL_BODY);
         body.position.set(0, 0.4, 0);
         g.add(body);
         const lid = new THREE.Mesh(
@@ -157,16 +161,10 @@ const ObjectBuilder = {
     // ---- Bush ----
     _bush() {
         const g = new THREE.Group();
-        const bushy = new THREE.Mesh(
-            new THREE.BoxGeometry(1.2, 0.6, 1.2),
-            this._mat(RSC.COL_TREE_CANOPY1)
-        );
+        const bushy = this._meshLit(1.2, 0.6, 1.2, RSC.COL_TREE_CANOPY1);
         bushy.position.set(0, 0.3, 0);
         g.add(bushy);
-        const top = new THREE.Mesh(
-            new THREE.BoxGeometry(0.8, 0.28, 0.8),
-            this._mat(RSC.COL_TREE_CANOPY2)
-        );
+        const top = this._meshLit(0.8, 0.28, 0.8, RSC.COL_TREE_CANOPY2);
         top.position.set(0, 0.74, 0);
         g.add(top);
         return g;
@@ -211,14 +209,13 @@ const ObjectBuilder = {
         const g = new THREE.Group();
         const S = RSC.TILE_SIZE;  // 4 — posts span full tile
 
-        const postGeo  = new THREE.BoxGeometry(0.25, 2.5, 0.25);
         const railHGeo = new THREE.BoxGeometry(S,    0.12, 0.12);
         const railVGeo = new THREE.BoxGeometry(0.12, 0.12, S);
         const railY    = [0.8, 1.6];
 
         if (orientation === 'h') {
             for (const px of [-S/2, 0, S/2]) {
-                const post = new THREE.Mesh(postGeo, this._mat(RSC.COL_FENCE));
+                const post = this._meshLit(0.25, 2.5, 0.25, RSC.COL_FENCE);
                 post.position.set(px, 1.25, 0);
                 g.add(post);
             }
@@ -229,7 +226,7 @@ const ObjectBuilder = {
             }
         } else {
             for (const pz of [-S/2, 0, S/2]) {
-                const post = new THREE.Mesh(postGeo, this._mat(RSC.COL_FENCE));
+                const post = this._meshLit(0.25, 2.5, 0.25, RSC.COL_FENCE);
                 post.position.set(0, 1.25, pz);
                 g.add(post);
             }
@@ -285,61 +282,44 @@ const ObjectBuilder = {
         const roofH = bType === 'noc' ?  1.0 :  3.5;
 
         if (bType === 'noc') {
-            const sw = new THREE.Mesh(new THREE.BoxGeometry(bw, wallH, wallT), this._mat(RSC.COL_NOC_SOUTH));
-            sw.position.set(0, wallH/2, bd/2);
-            g.add(sw);
-            const ew = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, bd), this._mat(RSC.COL_NOC_EAST));
-            ew.position.set(bw/2, wallH/2, 0);
-            g.add(ew);
-            const nw = new THREE.Mesh(new THREE.BoxGeometry(bw, wallH, wallT), this._mat(0x2a2a2a));
-            nw.position.set(0, wallH/2, -bd/2);
-            g.add(nw);
-            const ww = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, bd), this._mat(0x222222));
-            ww.position.set(-bw/2, wallH/2, 0);
-            g.add(ww);
+            // NOC: single thick box — per-face lighting gives clear south/east/top brightness difference
+            const body = this._meshLit(bw, wallH, bd, 0x2e2e2e);
+            body.position.set(0, wallH/2, 0);
+            g.add(body);
             // Roof slab
-            const roof = new THREE.Mesh(new THREE.BoxGeometry(bw, roofH, bd), this._mat(RSC.COL_NOC_ROOF));
+            const roof = this._meshLit(bw, roofH, bd, RSC.COL_NOC_ROOF);
             roof.position.set(0, wallH + roofH/2, 0);
             g.add(roof);
             // SolarWinds orange stripe
             const stripe = new THREE.Mesh(new THREE.BoxGeometry(bw, 0.2, 0.5), this._mat(RSC.COL_NOC_STRIPE));
             stripe.position.set(0, wallH + roofH + 0.1, -bd/2 + 2.0);
             g.add(stripe);
-            // Windows (3 on south face)
+            // Windows (3 on south face — slightly proud of wall)
             for (const wx of [-bw/2 + 1.5, -bw/2 + 4.5, -bw/2 + 7.5]) {
-                const win = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.5, 0.15), this._mat(RSC.COL_WINDOW));
-                win.position.set(wx, wallH * 0.45, bd/2 + 0.02);
+                const win = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.5, 0.3), this._mat(RSC.COL_WINDOW));
+                win.position.set(wx, wallH * 0.45, bd/2 + 0.15);
                 g.add(win);
             }
         } else {
-            // House: warm stone, south wall (facing player) medium brightness
-            const sw = new THREE.Mesh(new THREE.BoxGeometry(bw, wallH, wallT), this._mat(RSC.COL_BLDG_SOUTH));
-            sw.position.set(0, wallH/2, bd/2);
-            g.add(sw);
-            // East wall — darker
-            const ew = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, bd), this._mat(RSC.COL_BLDG_EAST));
-            ew.position.set(bw/2, wallH/2, 0);
-            g.add(ew);
-            // North wall — dark
-            const nwm = new THREE.Mesh(new THREE.BoxGeometry(bw, wallH, wallT), this._mat(RSC.COL_BLDG_EAST));
-            nwm.position.set(0, wallH/2, -bd/2);
-            g.add(nwm);
-            // West wall — medium (matches south)
-            const ww = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, bd), this._mat(RSC.COL_BLDG_SOUTH));
-            ww.position.set(-bw/2, wallH/2, 0);
-            g.add(ww);
-            // Roof
-            const roof = new THREE.Mesh(new THREE.BoxGeometry(bw + 0.4, roofH, bd + 0.4), this._mat(RSC.COL_BLDG_ROOF));
+            // House: single thick box — per-face lighting gives clearly visible south/east/north brightness gradient
+            // South face (+Z, facing camera) = 0.90 brightness → bright
+            // East face (+X) = 0.65 brightness → mid-shadow
+            // North face (-Z, back) = 0.50 brightness → dark shadow
+            const body = this._meshLit(bw, wallH, bd, 0x8b5a1e);  // warm sandstone base
+            body.position.set(0, wallH/2, 0);
+            g.add(body);
+            // Roof — per-face lit
+            const roof = this._meshLit(bw + 0.4, roofH, bd + 0.4, RSC.COL_BLDG_ROOF);
             roof.position.set(0, wallH + roofH/2, 0);
             g.add(roof);
-            // Door on south face
-            const door = new THREE.Mesh(new THREE.BoxGeometry(1.2, 3.5, wallT + 0.02), this._mat(RSC.COL_DOOR));
-            door.position.set(0, 1.75, bd/2 + 0.01);
+            // Door on south face (slightly proud)
+            const door = new THREE.Mesh(new THREE.BoxGeometry(1.2, 3.5, 0.3), this._mat(RSC.COL_DOOR));
+            door.position.set(0, 1.75, bd/2 + 0.15);
             g.add(door);
             // Windows (2 on south face)
             for (const wx of [-bw/4, bw/4]) {
-                const win = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.2, wallT + 0.02), this._mat(RSC.COL_WINDOW));
-                win.position.set(wx, wallH * 0.55, bd/2 + 0.01);
+                const win = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.2, 0.3), this._mat(RSC.COL_WINDOW));
+                win.position.set(wx, wallH * 0.55, bd/2 + 0.15);
                 g.add(win);
             }
         }

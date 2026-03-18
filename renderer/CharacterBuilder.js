@@ -29,6 +29,25 @@ const CharacterBuilder = {
         return new THREE.MeshBasicMaterial({ color: colorHex });
     },
 
+    // RSC NW light: per-face brightness, 4 verts/face × 6 faces = 24 verts
+    _applyFaceLighting(geo, baseHex) {
+        const base = new THREE.Color(baseHex);
+        const BRIGHTNESS = [0.65, 0.45, 1.00, 0.15, 0.90, 0.50];
+        const colors = new Float32Array(24 * 3);
+        for (let face = 0; face < 6; face++) {
+            const b = BRIGHTNESS[face];
+            for (let v = 0; v < 4; v++) {
+                const i = (face * 4 + v) * 3;
+                colors[i]   = base.r * b;
+                colors[i+1] = base.g * b;
+                colors[i+2] = base.b * b;
+            }
+        }
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        return geo;
+    },
+    _matLit() { return new THREE.MeshBasicMaterial({ vertexColors: true }); },
+
     // opts: { color, legsColor, hat, npcType, hairColor }
     // Returns: THREE.Group with userData.legL, userData.legR, userData.nameLabel
     build(opts = {}) {
@@ -63,31 +82,37 @@ const CharacterBuilder = {
         shadowMesh.position.set(0, 0.01, 0);
         group.add(shadowMesh);
 
-        // Legs
-        const legL = new THREE.Mesh(this._geos.legL, this._mat(legsColor));
+        // Legs (per-instance lit geometry)
+        const legLGeo = this._applyFaceLighting(new THREE.BoxGeometry(5*S, 9*S, 3*S), legsColor);
+        const legL = new THREE.Mesh(legLGeo, this._matLit());
         legL.position.set(-3*S, legBotY, 0);
         group.add(legL);
 
-        const legR = new THREE.Mesh(this._geos.legR, this._mat(legsColor));
+        const legRGeo = this._applyFaceLighting(new THREE.BoxGeometry(5*S, 9*S, 3*S), legsColor);
+        const legR = new THREE.Mesh(legRGeo, this._matLit());
         legR.position.set(3*S, legBotY, 0);
         group.add(legR);
 
-        // Torso
-        const torso = new THREE.Mesh(this._geos.torso, this._mat(shirtColor));
+        // Torso (per-instance lit)
+        const torsoGeo = this._applyFaceLighting(new THREE.BoxGeometry(14*S, 10*S, 4*S), shirtColor);
+        const torso = new THREE.Mesh(torsoGeo, this._matLit());
         torso.position.set(0, torsoBotY, 0);
         group.add(torso);
 
-        // Arms (use shirt color, slightly offset out)
-        const armL = new THREE.Mesh(this._geos.armL, this._mat(shirtColor));
+        // Arms (per-instance lit)
+        const armLGeo = this._applyFaceLighting(new THREE.BoxGeometry(4*S, 9*S, 3*S), shirtColor);
+        const armL = new THREE.Mesh(armLGeo, this._matLit());
         armL.position.set(-9*S, torsoBotY - S, 0);
         group.add(armL);
 
-        const armR = new THREE.Mesh(this._geos.armR, this._mat(shirtColor));
+        const armRGeo = this._applyFaceLighting(new THREE.BoxGeometry(4*S, 9*S, 3*S), shirtColor);
+        const armR = new THREE.Mesh(armRGeo, this._matLit());
         armR.position.set(9*S, torsoBotY - S, 0);
         group.add(armR);
 
-        // Head
-        const head = new THREE.Mesh(this._geos.head, this._mat(RSC.COL_SKIN));
+        // Head (per-instance lit — skin on front face, depth visible from side)
+        const headGeo = this._applyFaceLighting(new THREE.BoxGeometry(10*S, 10*S, 8*S), RSC.COL_SKIN);
+        const head = new THREE.Mesh(headGeo, this._matLit());
         head.position.set(0, headBotY, 0);
         group.add(head);
 
