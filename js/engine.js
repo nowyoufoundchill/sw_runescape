@@ -275,6 +275,9 @@ const Engine = {
     },
 
     _onKeyDown(e) {
+        // Don't intercept keypresses when the user is typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
         if (NPC.activeDialogue) {
             if (e.key === 'Escape') NPC.closeDialogue();
             return;
