@@ -208,7 +208,7 @@ const UI = {
         for (let y = 0; y < World.MAP_H; y++) {
             for (let x = 0; x < World.MAP_W; x++) {
                 const tile = World.getTile(x, y);
-                const colors = ['#2d5a1e', '#7a6030', '#c4a854', '#1a3a6a', '#666', '#8a7a5a', '#6a4a2a', '#cc3300', '#2a4a1a'];
+                const colors = ['#4a7c3f', '#8b6914', '#b89a4a', '#2244aa', '#6b6b6b', '#8b6914', '#5c3d1e', '#aa3300', '#2a4a1a'];
                 ctx.fillStyle = colors[tile] || '#000';
                 ctx.fillRect(x * scale, y * scale, scale + 0.5, scale + 0.5);
             }
