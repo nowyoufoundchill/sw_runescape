@@ -90,21 +90,40 @@ const ObjectBuilder = {
     },
 
     // ---- Tree ----
-    // RSC spec: total height 10-12 units, canopy width 8-10 units
+    // RSC spec: total height 10-12 units, canopy spherical not boxy.
+    // Approximate sphere with 5 offset boxes at 45° rotations — breaks square silhouette.
     _tree() {
         const g = new THREE.Group();
-        // Trunk: per-face lit (dark sides, lighter top)
+        // Trunk
         const trunk = this._meshLit(0.6, 4.0, 0.6, RSC.COL_TREE_TRUNK);
         trunk.position.set(0, 2.0, 0);
         g.add(trunk);
-        // Lower canopy — per-face lit (dark sides, bright top)
-        const can1 = this._meshLit(8.0, 4.5, 8.0, RSC.COL_TREE_CANOPY1);
-        can1.position.set(0, 6.5, 0);
-        g.add(can1);
-        // Upper canopy — per-face lit, lighter green
-        const can2 = this._meshLit(6.0, 3.5, 6.0, RSC.COL_TREE_CANOPY2);
-        can2.position.set(0, 10.0, 0);
-        g.add(can2);
+
+        // Lower canopy — 5 overlapping boxes rotated to approximate a sphere
+        // Central large box + 4 diagonal corner boxes rotated 45° give rounded silhouette
+        const c1a = this._meshLit(8.0, 4.0, 8.0, RSC.COL_TREE_CANOPY1);
+        c1a.position.set(0, 6.5, 0);
+        g.add(c1a);
+        const c1b = this._meshLit(7.5, 4.0, 7.5, RSC.COL_TREE_CANOPY1);
+        c1b.rotation.y = Math.PI / 4;  // 45° rotated fills corners
+        c1b.position.set(0, 6.5, 0);
+        g.add(c1b);
+        // Extra vertical lobes for spherical top/bottom rounding
+        const c1c = this._meshLit(5.5, 6.0, 5.5, RSC.COL_TREE_CANOPY1);
+        c1c.position.set(0, 6.5, 0);
+        g.add(c1c);
+
+        // Upper canopy — same multi-box sphere trick, lighter green
+        const c2a = this._meshLit(6.0, 3.2, 6.0, RSC.COL_TREE_CANOPY2);
+        c2a.position.set(0, 10.2, 0);
+        g.add(c2a);
+        const c2b = this._meshLit(5.5, 3.2, 5.5, RSC.COL_TREE_CANOPY2);
+        c2b.rotation.y = Math.PI / 4;
+        c2b.position.set(0, 10.2, 0);
+        g.add(c2b);
+        const c2c = this._meshLit(4.0, 5.0, 4.0, RSC.COL_TREE_CANOPY2);
+        c2c.position.set(0, 10.2, 0);
+        g.add(c2c);
         return g;
     },
 
