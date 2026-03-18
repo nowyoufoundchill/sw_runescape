@@ -42,8 +42,8 @@
 
             <!-- Main Game Area -->
             <div id="game-main">
-                <!-- Game Viewport -->
-                <canvas id="game-canvas" width="512" height="384"></canvas>
+                <!-- Three.js 3D Viewport (replaces 2D canvas) -->
+                <div id="three-viewport"></div>
 
                 <!-- Right Panel -->
                 <div id="right-panel">
@@ -103,12 +103,28 @@
         </div>
     </div>
 
+    <!-- Three.js r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- CSS2DRenderer for floating character name labels -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+
+    <!-- Game logic (UNTOUCHED) -->
     <script src="js/assets.js"></script>
     <script src="js/world.js"></script>
     <script src="js/player.js"></script>
     <script src="js/npc.js"></script>
     <script src="js/quest.js"></script>
     <script src="js/ui.js"></script>
+
+    <!-- Three.js renderer modules -->
+    <script src="renderer/Constants.js"></script>
+    <script src="renderer/ThreeRenderer.js"></script>
+    <script src="renderer/TerrainBuilder.js"></script>
+    <script src="renderer/CharacterBuilder.js"></script>
+    <script src="renderer/ObjectBuilder.js"></script>
+    <script src="renderer/Camera.js"></script>
+
+    <!-- Engine (Three.js game loop) -->
     <script src="js/engine.js"></script>
 </body>
 </html>
