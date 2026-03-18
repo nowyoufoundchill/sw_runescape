@@ -13,8 +13,9 @@ const NPC = {
             name: 'SysAdmin Steve',
             x: 34, y: 32,
             type: 'human',
-            color: '#336699',
-            hat: '#336699',
+            color: '#2244cc',       // spec: shirt blue
+            legsColor: '#222244',   // spec: dark navy legs
+            hat: '#2244cc',
             dialogue: 'guide_intro',
             region: 'Luminara',
             wander: false,
@@ -37,7 +38,8 @@ const NPC = {
             name: 'Banker Bob',
             x: 38, y: 28,
             type: 'human',
-            color: '#333366',
+            color: '#ccaa22',       // spec: gold shirt
+            legsColor: '#443300',   // spec: dark brown legs
             dialogue: 'bank_intro',
             region: 'Luminara',
             wander: false,
@@ -48,7 +50,8 @@ const NPC = {
             name: 'Chef Charlie',
             x: 38, y: 38,
             type: 'human',
-            color: '#ffffff',
+            color: '#ffffff',       // spec: white shirt
+            legsColor: '#888888',   // spec: grey legs
             hat: '#ffffff',
             dialogue: 'chef_intro',
             region: 'Luminara',
@@ -185,19 +188,11 @@ const NPC = {
             wander: false,
         });
 
-        // Generate sprites for all NPCs
-        this.list.forEach(npc => {
-            npc.sprite = Assets.generateCharacterSprite({
-                color: npc.color || '#888',
-                isNPC: true,
-                npcType: npc.npcType || 'human',
-                hat: npc.hat,
-            });
-        });
+        // Sprites already generated in add() per Phase 1 spec
     },
 
     add(config) {
-        this.list.push({
+        const npc = {
             ...config,
             homeX: config.x,
             homeY: config.y,
@@ -205,7 +200,25 @@ const NPC = {
             wanderDelay: 2000 + Math.random() * 3000,
             dir: 'south',
             talkCooldown: 0,
+        };
+        // Generate sprite with spec colors (Phase 1)
+        npc.sprite = Assets.generateCharacterSprite({
+            color:      config.color || '#888888',
+            legsColor:  config.legsColor || null,
+            hat:        config.hat || null,
+            npcType:    config.type || 'human',
+            isNPC:      true,
+            walkFrame:  0,
         });
+        npc.spriteWalk = Assets.generateCharacterSprite({
+            color:      config.color || '#888888',
+            legsColor:  config.legsColor || null,
+            hat:        config.hat || null,
+            npcType:    config.type || 'human',
+            isNPC:      true,
+            walkFrame:  1,
+        });
+        this.list.push(npc);
     },
 
     update(dt) {

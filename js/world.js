@@ -97,8 +97,27 @@ const World = {
         for (let y = 20; y < 36; y++) {
             for (let x = 6; x < 24; x++) {
                 this.setTile(x, y, T.GRASS);
-                if (this.rand() < 0.12 && x > 7 && y > 21) {
-                    this.addObject(x, y, 'tree', false);
+            }
+        }
+        // Trees in natural clusters of 2-4 (Phase 3 spec: never single isolated)
+        const treeClusters = [
+            { cx: 8,  cy: 22, r: 1 }, { cx: 11, cy: 22, r: 1 },
+            { cx: 14, cy: 21, r: 2 }, { cx: 19, cy: 23, r: 1 },
+            { cx: 22, cy: 22, r: 1 }, { cx: 8,  cy: 26, r: 1 },
+            { cx: 11, cy: 27, r: 2 }, { cx: 16, cy: 26, r: 1 },
+            { cx: 20, cy: 27, r: 2 }, { cx: 8,  cy: 31, r: 2 },
+            { cx: 13, cy: 32, r: 1 }, { cx: 17, cy: 31, r: 1 },
+            { cx: 21, cy: 33, r: 2 }, { cx: 9,  cy: 35, r: 1 },
+        ];
+        for (const c of treeClusters) {
+            for (let dy = -c.r; dy <= c.r; dy++) {
+                for (let dx = -c.r; dx <= c.r; dx++) {
+                    if (this.rand() < 0.7) {
+                        const tx2 = c.cx + dx, ty2 = c.cy + dy;
+                        if (this.getTile(tx2, ty2) !== T.PATH) {
+                            this.addObject(tx2, ty2, 'tree', false);
+                        }
+                    }
                 }
             }
         }
@@ -156,6 +175,18 @@ const World = {
         this.addObject(37, 13, 'serverRack', false);
         this.addObject(29, 19, 'serverRack', false);
         this.addObject(37, 19, 'serverRack', false);
+
+        // === BARRELS near building entrances (Phase 3 spec) ===
+        // Near General Store entrance
+        this.addAmbient(29, 30, 'barrel');
+        this.addAmbient(30, 30, 'barrel');
+        // Near Bank entrance
+        this.addAmbient(39, 30, 'barrel');
+        // Near Inn entrance
+        this.addAmbient(39, 40, 'barrel');
+        this.addAmbient(40, 40, 'barrel');
+        // Near Smithy entrance
+        this.addAmbient(29, 40, 'barrel');
 
         // === PATHS between areas ===
         this.fillRegion(24, 33, 4, 2, T.PATH);   // west to forest

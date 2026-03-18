@@ -1,4 +1,5 @@
-/* SolarWinds Quest - RSC Style (Muted/Earthy Palette) */
+/* SolarWinds Quest - RSC Visual Fidelity v3 */
+/* Phase 6: Press Start 2P everywhere, no border-radius, no box-shadow */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 * {
@@ -9,8 +10,7 @@
 
 body {
     background: #000;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
     color: #ffff00;
     overflow: hidden;
     height: 100vh;
@@ -33,20 +33,11 @@ body {
 #login-screen {
     width: 100%;
     height: 100%;
-    background: linear-gradient(180deg, #0a0a00 0%, #1a1000 30%, #0a0a00 100%);
+    background: #000;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-}
-
-#login-screen::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background:
-        radial-gradient(ellipse at 20% 50%, rgba(200, 80, 0, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 50%, rgba(200, 80, 0, 0.06) 0%, transparent 50%);
 }
 
 #login-box {
@@ -56,17 +47,16 @@ body {
 }
 
 #login-logo h1 {
-    font-family: 'Press Start 2P', 'Courier New', monospace;
-    font-size: 20px;
-    color: #cc5500;
-    text-shadow: 2px 2px 0 #000, 0 0 8px rgba(200, 80, 0, 0.4);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: #cc2200;
     margin-bottom: 8px;
+    text-shadow: 2px 2px 0 #000;
 }
 
 #login-logo .subtitle {
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
     color: #886622;
     letter-spacing: 2px;
 }
@@ -77,55 +67,51 @@ body {
 
 #login-form label {
     display: block;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
+    font-family: 'Press Start 2P', monospace;
     color: #ffff00;
-    font-size: 11px;
-    margin-bottom: 6px;
+    font-size: 9px;
+    margin-bottom: 8px;
 }
 
 #login-form input {
     background: #111100;
     border: 1px solid #554400;
     color: #ffff00;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 13px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
     padding: 8px 12px;
-    width: 200px;
+    width: 220px;
     text-align: center;
     outline: none;
 }
 
 #login-form input:focus {
     border-color: #ffff00;
-    box-shadow: 0 0 4px rgba(255, 255, 0, 0.2);
 }
 
 #login-btn {
     display: block;
     margin: 15px auto 0;
-    background: linear-gradient(180deg, #442200 0%, #221100 100%);
+    background: #221100;
     border: 1px solid #cc5500;
     color: #cc5500;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 12px;
-    padding: 8px 25px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    padding: 8px 20px;
     cursor: pointer;
     letter-spacing: 1px;
 }
 
 #login-btn:hover {
-    background: linear-gradient(180deg, #553300 0%, #331a00 100%);
+    background: #331a00;
     color: #ff6600;
 }
 
 #login-footer {
     margin-top: 30px;
-    font-family: 'Courier New', monospace;
+    font-family: 'Press Start 2P', monospace;
     color: #443300;
-    font-size: 9px;
+    font-size: 7px;
     letter-spacing: 1px;
 }
 
@@ -146,9 +132,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0 8px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 9px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
 }
 
 #top-bar-left, #top-bar-right {
@@ -174,37 +159,40 @@ body {
     cursor: crosshair;
 }
 
-/* === RIGHT PANEL === */
+/* === RIGHT PANEL (Phase 6) === */
 #right-panel {
     width: 210px;
     background: #1a1a1a;
-    border-left: 1px solid #333;
+    border-left: 2px solid #333333;
     display: flex;
     flex-direction: column;
 }
 
+/* Tab bar */
 #panel-tabs {
     display: flex;
-    background: #222;
+    background: #1a1a1a;
     border-bottom: 1px solid #333;
 }
 
 .panel-tab {
     flex: 1;
-    background: none;
+    background: #1a1a1a;  /* inactive: #1a1a1a, text #888 */
     border: none;
     border-right: 1px solid #2a2a2a;
-    color: #888;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 9px;
-    padding: 4px 2px;
+    color: #888888;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    padding: 5px 2px;
     cursor: pointer;
 }
 
 .panel-tab:last-child { border-right: none; }
 .panel-tab:hover { color: #ffff00; }
-.panel-tab.active { color: #ffff00; background: #2a2200; }
+.panel-tab.active {
+    background: #2a2a2a;   /* active: #2a2a2a */
+    color: #ffff00;        /* active text: yellow */
+}
 
 #panel-content {
     flex: 1;
@@ -212,10 +200,10 @@ body {
     padding: 6px;
 }
 
+/* Section headers — red #cc2200 */
 .panel h3 {
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 11px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
     color: #cc2200;
     border-bottom: 1px solid #333;
     padding-bottom: 4px;
@@ -227,25 +215,24 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 2px 0;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
 }
 
-.skill-name { color: #ccc; }
-.skill-level { color: #00ff00; }
+.skill-name { color: #cccccc; }
+.skill-level { color: #ffff00; }   /* stat values: yellow #ffff00 */
 
+/* Skill bars — red fill on dark background */
 .skill-bar {
     width: 100%;
-    height: 4px;
-    background: #2a2a2a;
-    margin-top: 1px;
+    height: 8px;
+    background: #333333;
+    margin-top: 2px;
 }
 
 .skill-bar-fill {
     height: 100%;
-    background: #006600;
-    transition: width 0.3s;
+    background: #cc2200;  /* red fill per spec */
 }
 
 /* Inventory */
@@ -272,9 +259,8 @@ body {
 .inv-slot .item-name {
     position: absolute;
     bottom: 1px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 7px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6px;
     color: #ffff00;
     text-align: center;
     width: 100%;
@@ -286,9 +272,8 @@ body {
 /* Quests */
 .quest-entry {
     padding: 4px 0;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
     cursor: pointer;
     border-bottom: 1px solid #1a1a1a;
 }
@@ -296,7 +281,7 @@ body {
 .quest-entry:hover { background: #1a1a00; }
 .quest-not-started { color: #cc2200; }
 .quest-in-progress { color: #ffff00; }
-.quest-complete { color: #00ff00; }
+.quest-complete    { color: #00ff00; }
 
 /* Minimap */
 #minimap-canvas {
@@ -310,22 +295,21 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 3px 4px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
     border-bottom: 1px solid #1a1a1a;
 }
 
-.lb-rank { color: #ffff00; width: 20px; }
-.lb-name { color: #ccc; flex: 1; }
-.lb-score { color: #00ff00; }
+.lb-rank  { color: #ffff00; width: 20px; }
+.lb-name  { color: #cccccc; flex: 1; }
+.lb-score { color: #ffff00; }
 .lb-entry.lb-self { background: #2a1a00; }
 
-/* === CHAT BOX === */
+/* === CHAT BOX (Phase 6) === */
 #chat-box {
     height: 80px;
-    background: #111;
-    border-top: 1px solid #333;
+    background: #000000;  /* black background per spec */
+    border-top: 2px solid #333333;
     display: flex;
     flex-direction: column;
 }
@@ -334,31 +318,32 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 4px 8px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
 }
 
+/* Chat message type colors per spec */
 .chat-msg { padding: 1px 0; }
-.chat-msg.system { color: #00cccc; }
-.chat-msg.npc { color: #ffff00; }
-.chat-msg.player { color: #ffffff; }
-.chat-msg.quest { color: #00ff00; }
-.chat-msg.error { color: #ff4444; }
+.chat-msg.system { color: #ffffff; }              /* white */
+.chat-msg.npc    { color: #4488ff; }              /* blue */
+.chat-msg.player { color: #000000; background: #ffffff; padding: 0 2px; } /* black on white */
+.chat-msg.quest  { color: #ffaa00; }              /* orange */
+.chat-msg.combat { color: #ff4444; }              /* red */
+.chat-msg.error  { color: #ff4444; }
 
 #chat-input-row {
     border-top: 1px solid #222;
     padding: 3px 8px;
 }
 
+/* Chat input with pixel font */
 #chat-input {
     width: 100%;
-    background: #111100;
+    background: #000;
     border: 1px solid #333;
     color: #ffff00;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
     padding: 3px 6px;
     outline: none;
 }
@@ -372,7 +357,7 @@ body {
     left: 0;
     right: 210px;
     bottom: 80px;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.80);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -388,19 +373,17 @@ body {
 }
 
 #dialogue-speaker {
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
+    font-family: 'Press Start 2P', monospace;
     color: #cc5500;
-    font-size: 11px;
-    margin-bottom: 8px;
+    font-size: 9px;
+    margin-bottom: 10px;
 }
 
 #dialogue-text {
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
+    font-family: 'Press Start 2P', monospace;
     color: #ffff00;
-    font-size: 10px;
-    line-height: 1.5;
+    font-size: 8px;
+    line-height: 1.6;
     margin-bottom: 12px;
 }
 
@@ -414,9 +397,8 @@ body {
     background: #1a1400;
     border: 1px solid #554400;
     color: #00cccc;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
     padding: 6px 10px;
     cursor: pointer;
     text-align: left;
@@ -444,7 +426,7 @@ body {
 .level-up-text {
     position: absolute;
     color: #ffff00;
-    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-family: 'Press Start 2P', monospace;
     font-size: 9px;
     animation: levelUp 1.5s ease-out forwards;
     pointer-events: none;
