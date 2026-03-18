@@ -8,7 +8,7 @@ const CharacterBuilder = {
 
     _ensureGeos() {
         if (this._geos) return;
-        const S = 0.055; // pixels → world units (character ~1.6 units tall in a 2-unit tile)
+        const S = 0.2; // RSC spec: character ~5.8 units tall in a 4-unit tile (ratio 1.45)
         this._geos = {
             head:   new THREE.BoxGeometry(10*S, 10*S, 8*S),
             torso:  new THREE.BoxGeometry(14*S, 10*S, 4*S),
@@ -19,8 +19,8 @@ const CharacterBuilder = {
             hatBrim:new THREE.BoxGeometry(12*S,  2*S, 9*S),
             // Goblin-specific
             headG:  new THREE.BoxGeometry(12*S, 10*S, 8*S),
-            // Shadow disk
-            shadow: new THREE.CircleGeometry(0.28, 8),
+            // Shadow disk — proportional to character size
+            shadow: new THREE.CircleGeometry(1.0, 10),
         };
         this._geos.shadow.rotateX(-Math.PI / 2);
     },
@@ -42,7 +42,7 @@ const CharacterBuilder = {
         const hatColor   = opts.hat        ? this._cssToHex(opts.hat)        : null;
 
         const group = new THREE.Group();
-        const S     = 0.055;
+        const S     = 0.2;
 
         if (npcType === 'goblin') {
             return this._buildGoblin(group, S);
@@ -123,13 +123,16 @@ const CharacterBuilder = {
         // Store references for animation
         group.userData.legL     = legL;
         group.userData.legR     = legR;
+        group.userData.armL     = armL;
+        group.userData.armR     = armR;
         group.userData.walkTimer = 0;
         group.userData.walkFrame = 0;
 
         return group;
     },
 
-    _buildGoblin(group, S) {
+    _buildGoblin(group, _S) {
+        const S = 0.2;
         // Shadow
         const shadowMesh = new THREE.Mesh(this._geos.shadow, this._mat(0x000000));
         shadowMesh.material.transparent = true;
@@ -176,7 +179,8 @@ const CharacterBuilder = {
         return group;
     },
 
-    _buildGuard(group, S) {
+    _buildGuard(group, _S) {
+        const S = 0.2;
         const shadowMesh = new THREE.Mesh(this._geos.shadow, this._mat(0x000000));
         shadowMesh.material.transparent = true;
         shadowMesh.material.opacity = 0.35;
@@ -235,7 +239,7 @@ const CharacterBuilder = {
     updateWalk(group, isMoving, dt) {
         if (!group || !group.userData.legL) return;
 
-        const WALK_AMP   = 0.35;  // radians
+        const WALK_AMP   = 0.44;  // ±25° per RSC spec
         const WALK_SPEED = 350;   // ms per full cycle
 
         if (isMoving) {
@@ -244,9 +248,14 @@ const CharacterBuilder = {
             const angle = Math.sin(phase * Math.PI * 2) * WALK_AMP;
             group.userData.legL.rotation.x =  angle;
             group.userData.legR.rotation.x = -angle;
+            // Arms swing opposite to legs (±20° per RSC spec)
+            if (group.userData.armL) group.userData.armL.rotation.x = -angle * 0.8;
+            if (group.userData.armR) group.userData.armR.rotation.x =  angle * 0.8;
         } else {
             group.userData.legL.rotation.x *= 0.8;
             group.userData.legR.rotation.x *= 0.8;
+            if (group.userData.armL) group.userData.armL.rotation.x *= 0.8;
+            if (group.userData.armR) group.userData.armR.rotation.x *= 0.8;
         }
     },
 

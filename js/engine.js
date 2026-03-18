@@ -163,9 +163,10 @@ const Engine = {
         this.playerLerpX += (targetX - this.playerLerpX) * RSC.LERP_SPEED;
         this.playerLerpZ += (targetZ - this.playerLerpZ) * RSC.LERP_SPEED;
 
-        // Update player group transform
+        // Update player group transform — Y follows terrain height
         if (this.playerGroup) {
-            this.playerGroup.position.set(this.playerLerpX, 0, this.playerLerpZ);
+            const py = TerrainBuilder.getHeightAt(this.playerLerpX, this.playerLerpZ);
+            this.playerGroup.position.set(this.playerLerpX, py, this.playerLerpZ);
             CharacterBuilder.updateWalk(this.playerGroup, Player.isMoving(), dt);
         }
 
@@ -180,7 +181,8 @@ const Engine = {
 
             const group = this.npcGroups[npc.id];
             if (group) {
-                group.position.set(lerp.x, 0, lerp.z);
+                const ny = TerrainBuilder.getHeightAt(lerp.x, lerp.z);
+                group.position.set(lerp.x, ny, lerp.z);
                 CharacterBuilder.updateWalk(group, npc.wander && (Date.now() % 1200 < 600), dt);
             }
         }
@@ -212,7 +214,8 @@ const Engine = {
         for (let i = Player.pathIndex; i < Player.path.length; i++) {
             const p = Player.path[i];
             const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(p.x * S + S / 2, 0.02, p.y * S + S / 2);
+            const tileY = TerrainBuilder.getHeightAt(p.x * S + S/2, p.y * S + S/2);
+            mesh.position.set(p.x * S + S / 2, tileY + 0.02, p.y * S + S / 2);
             ThreeRenderer.scene.add(mesh);
             this._pathHighlights.push(mesh);
         }

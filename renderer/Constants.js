@@ -1,17 +1,18 @@
 // renderer/Constants.js
 // Three.js migration constants — spec: TILE_SIZE=2, FOV 60°, MeshBasicMaterial only
 const RSC = {
-    // World coordinate scale: 1 tile = 2 Three.js world units
-    TILE_SIZE: 2,
+    // World coordinate scale: 1 tile = 4 Three.js world units (RSC spec)
+    TILE_SIZE: 4,
 
     // Camera parameters (PerspectiveCamera)
+    // Pitch = arctan((20-2)/22) = 39.3° — within RSC spec 35-40° range
     CAM_FOV:       60,
     CAM_NEAR:      0.1,
-    CAM_FAR:       300,
+    CAM_FAR:       500,
     CAM_OFFSET_X:  0,
-    CAM_OFFSET_Y:  14,
-    CAM_OFFSET_Z:  12,
-    CAM_LOOKAT_Y:  0.5,
+    CAM_OFFSET_Y:  20,
+    CAM_OFFSET_Z:  22,
+    CAM_LOOKAT_Y:  2.0,
 
     // Character lerp speed (per frame, 0..1)
     LERP_SPEED: 0.18,

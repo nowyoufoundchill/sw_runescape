@@ -12,6 +12,9 @@ const TerrainBuilder = {
     _waterTimer:   0,
     _waterFrame:   0,
 
+    // Per-tile height storage (Float32Array, MAP_W * MAP_H)
+    _heightmap: null,
+
     // Array of terrain meshes exposed for raycasting
     meshes: [],
 
@@ -20,6 +23,15 @@ const TerrainBuilder = {
         const W = World.MAP_W;
         const H = World.MAP_H;
         const T = World.TILES;
+
+        // Build heightmap first (needed for vertex positions)
+        this._heightmap = new Float32Array(W * H);
+        for (let ty = 0; ty < H; ty++) {
+            for (let tx = 0; tx < W; tx++) {
+                const tile = World.getTile(tx, ty);
+                this._heightmap[ty * W + tx] = this._tileHeight(tx, ty, tile);
+            }
+        }
 
         // Separate buckets for water vs non-water
         const solidPos  = [];
@@ -33,16 +45,14 @@ const TerrainBuilder = {
 
         for (let ty = 0; ty < H; ty++) {
             for (let tx = 0; tx < W; tx++) {
-                const tile  = World.getTile(tx, ty);
+                const tile    = World.getTile(tx, ty);
                 const isWater = (tile === T.WATER);
-                const wx    = tx * S;
-                const wz    = ty * S;
-
-                // Flat terrain (y=0); height variation dropped for simplicity
-                const hy = 0;
+                const wx      = tx * S;
+                const wz      = ty * S;
+                const hy      = this._heightmap[ty * W + tx];
 
                 if (isWater) {
-                    // 4 un-shared vertices per water tile
+                    // 4 un-shared vertices per water tile (un-shared enables per-tile animation)
                     const base = wi * 4;
                     waterPos.push(
                         wx,     hy, wz,
@@ -59,9 +69,11 @@ const TerrainBuilder = {
                     waterIdx.push(base, base+1, base+2, base, base+2, base+3);
                     wi++;
                 } else {
-                    const col  = this._tileColor(tile);
-                    const rgb  = this._hexRGB(col);
-                    const base = si * 4;
+                    // Checkerboard coloring based on (tx+ty)%2
+                    const checker = (tx + ty) % 2 === 0;
+                    const col     = this._tileColorChecker(tile, checker);
+                    const rgb     = this._hexRGB(col);
+                    const base    = si * 4;
                     solidPos.push(
                         wx,     hy, wz,
                         wx + S, hy, wz,
@@ -115,7 +127,41 @@ const TerrainBuilder = {
         }
     },
 
-    // Returns a tile color integer from RSC palette
+    // Returns terrain height (world-space Y) at a given world position
+    getHeightAt(worldX, worldZ) {
+        if (!this._heightmap) return 0;
+        const S  = RSC.TILE_SIZE;
+        const tx = Math.max(0, Math.min(World.MAP_W - 1, Math.floor(worldX / S)));
+        const tz = Math.max(0, Math.min(World.MAP_H - 1, Math.floor(worldZ / S)));
+        return this._heightmap[tz * World.MAP_W + tx];
+    },
+
+    // Height function: tile coords (0..MAP_W-1, 0..MAP_H-1)
+    _tileHeight(tx, ty, tileType) {
+        const T = World.TILES;
+        // Structural / walkable flat tiles
+        if (tileType === T.PATH || tileType === T.STONE || tileType === T.WOOD) return 0;
+        // Water sits in a depression
+        if (tileType === T.WATER) return -2.5;
+        // Natural sinusoidal terrain for grass and other organic tiles
+        const h = Math.sin(tx * 0.18) * Math.cos(ty * 0.18) * 3.5
+                + Math.sin(tx * 0.35 + 1.2) * Math.cos(ty * 0.28) * 1.8
+                + Math.sin(tx * 0.08) * Math.cos(ty * 0.12) * 2.0;
+        return Math.max(-1.0, Math.min(4.0, h));
+    },
+
+    // Checkerboard-aware tile color
+    _tileColorChecker(tile, checker) {
+        const T = World.TILES;
+        switch (tile) {
+            case T.GRASS: return checker ? RSC.COL_GRASS  : RSC.COL_GRASS2;
+            case T.PATH:  return checker ? RSC.COL_PATH   : 0x7a5810;
+            case T.DIRT:  return checker ? RSC.COL_DIRT   : 0x5a4008;
+            default:      return this._tileColor(tile);
+        }
+    },
+
+    // Returns a tile color integer from RSC palette (no checker)
     _tileColor(tile) {
         const T = World.TILES;
         switch (tile) {
