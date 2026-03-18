@@ -52,6 +52,7 @@ const Engine = {
     },
 
     startGame(name) {
+        if (this.running) return;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('game-screen').style.display  = 'flex';
 
