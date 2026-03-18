@@ -8,7 +8,7 @@ const CharacterBuilder = {
 
     _ensureGeos() {
         if (this._geos) return;
-        const S = 0.055; // pixels → world units (character ~1.6 units tall in a 2-unit tile)
+        const S = 0.2; // RSC spec: character ~5.8 units tall in a 4-unit tile (ratio 1.45)
         this._geos = {
             head:   new THREE.BoxGeometry(10*S, 10*S, 8*S),
             torso:  new THREE.BoxGeometry(14*S, 10*S, 4*S),
@@ -19,8 +19,8 @@ const CharacterBuilder = {
             hatBrim:new THREE.BoxGeometry(12*S,  2*S, 9*S),
             // Goblin-specific
             headG:  new THREE.BoxGeometry(12*S, 10*S, 8*S),
-            // Shadow disk
-            shadow: new THREE.CircleGeometry(0.28, 8),
+            // Shadow disk — proportional to character size
+            shadow: new THREE.CircleGeometry(1.0, 10),
         };
         this._geos.shadow.rotateX(-Math.PI / 2);
     },
@@ -28,6 +28,25 @@ const CharacterBuilder = {
     _mat(colorHex) {
         return new THREE.MeshBasicMaterial({ color: colorHex });
     },
+
+    // RSC NW light: per-face brightness, 4 verts/face × 6 faces = 24 verts
+    _applyFaceLighting(geo, baseHex) {
+        const base = new THREE.Color(baseHex);
+        const BRIGHTNESS = [0.65, 0.45, 1.00, 0.15, 0.90, 0.50];
+        const colors = new Float32Array(24 * 3);
+        for (let face = 0; face < 6; face++) {
+            const b = BRIGHTNESS[face];
+            for (let v = 0; v < 4; v++) {
+                const i = (face * 4 + v) * 3;
+                colors[i]   = base.r * b;
+                colors[i+1] = base.g * b;
+                colors[i+2] = base.b * b;
+            }
+        }
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        return geo;
+    },
+    _matLit() { return new THREE.MeshBasicMaterial({ vertexColors: true }); },
 
     // opts: { color, legsColor, hat, npcType, hairColor }
     // Returns: THREE.Group with userData.legL, userData.legR, userData.nameLabel
@@ -42,7 +61,7 @@ const CharacterBuilder = {
         const hatColor   = opts.hat        ? this._cssToHex(opts.hat)        : null;
 
         const group = new THREE.Group();
-        const S     = 0.055;
+        const S     = 0.2;
 
         if (npcType === 'goblin') {
             return this._buildGoblin(group, S);
@@ -63,31 +82,37 @@ const CharacterBuilder = {
         shadowMesh.position.set(0, 0.01, 0);
         group.add(shadowMesh);
 
-        // Legs
-        const legL = new THREE.Mesh(this._geos.legL, this._mat(legsColor));
+        // Legs (per-instance lit geometry)
+        const legLGeo = this._applyFaceLighting(new THREE.BoxGeometry(5*S, 9*S, 3*S), legsColor);
+        const legL = new THREE.Mesh(legLGeo, this._matLit());
         legL.position.set(-3*S, legBotY, 0);
         group.add(legL);
 
-        const legR = new THREE.Mesh(this._geos.legR, this._mat(legsColor));
+        const legRGeo = this._applyFaceLighting(new THREE.BoxGeometry(5*S, 9*S, 3*S), legsColor);
+        const legR = new THREE.Mesh(legRGeo, this._matLit());
         legR.position.set(3*S, legBotY, 0);
         group.add(legR);
 
-        // Torso
-        const torso = new THREE.Mesh(this._geos.torso, this._mat(shirtColor));
+        // Torso (per-instance lit)
+        const torsoGeo = this._applyFaceLighting(new THREE.BoxGeometry(14*S, 10*S, 4*S), shirtColor);
+        const torso = new THREE.Mesh(torsoGeo, this._matLit());
         torso.position.set(0, torsoBotY, 0);
         group.add(torso);
 
-        // Arms (use shirt color, slightly offset out)
-        const armL = new THREE.Mesh(this._geos.armL, this._mat(shirtColor));
+        // Arms (per-instance lit)
+        const armLGeo = this._applyFaceLighting(new THREE.BoxGeometry(4*S, 9*S, 3*S), shirtColor);
+        const armL = new THREE.Mesh(armLGeo, this._matLit());
         armL.position.set(-9*S, torsoBotY - S, 0);
         group.add(armL);
 
-        const armR = new THREE.Mesh(this._geos.armR, this._mat(shirtColor));
+        const armRGeo = this._applyFaceLighting(new THREE.BoxGeometry(4*S, 9*S, 3*S), shirtColor);
+        const armR = new THREE.Mesh(armRGeo, this._matLit());
         armR.position.set(9*S, torsoBotY - S, 0);
         group.add(armR);
 
-        // Head
-        const head = new THREE.Mesh(this._geos.head, this._mat(RSC.COL_SKIN));
+        // Head (per-instance lit — skin on front face, depth visible from side)
+        const headGeo = this._applyFaceLighting(new THREE.BoxGeometry(10*S, 10*S, 8*S), RSC.COL_SKIN);
+        const head = new THREE.Mesh(headGeo, this._matLit());
         head.position.set(0, headBotY, 0);
         group.add(head);
 
@@ -123,13 +148,16 @@ const CharacterBuilder = {
         // Store references for animation
         group.userData.legL     = legL;
         group.userData.legR     = legR;
+        group.userData.armL     = armL;
+        group.userData.armR     = armR;
         group.userData.walkTimer = 0;
         group.userData.walkFrame = 0;
 
         return group;
     },
 
-    _buildGoblin(group, S) {
+    _buildGoblin(group, _S) {
+        const S = 0.2;
         // Shadow
         const shadowMesh = new THREE.Mesh(this._geos.shadow, this._mat(0x000000));
         shadowMesh.material.transparent = true;
@@ -176,7 +204,8 @@ const CharacterBuilder = {
         return group;
     },
 
-    _buildGuard(group, S) {
+    _buildGuard(group, _S) {
+        const S = 0.2;
         const shadowMesh = new THREE.Mesh(this._geos.shadow, this._mat(0x000000));
         shadowMesh.material.transparent = true;
         shadowMesh.material.opacity = 0.35;
@@ -235,7 +264,7 @@ const CharacterBuilder = {
     updateWalk(group, isMoving, dt) {
         if (!group || !group.userData.legL) return;
 
-        const WALK_AMP   = 0.35;  // radians
+        const WALK_AMP   = 0.44;  // ±25° per RSC spec
         const WALK_SPEED = 350;   // ms per full cycle
 
         if (isMoving) {
@@ -244,9 +273,14 @@ const CharacterBuilder = {
             const angle = Math.sin(phase * Math.PI * 2) * WALK_AMP;
             group.userData.legL.rotation.x =  angle;
             group.userData.legR.rotation.x = -angle;
+            // Arms swing opposite to legs (±20° per RSC spec)
+            if (group.userData.armL) group.userData.armL.rotation.x = -angle * 0.8;
+            if (group.userData.armR) group.userData.armR.rotation.x =  angle * 0.8;
         } else {
             group.userData.legL.rotation.x *= 0.8;
             group.userData.legR.rotation.x *= 0.8;
+            if (group.userData.armL) group.userData.armL.rotation.x *= 0.8;
+            if (group.userData.armR) group.userData.armR.rotation.x *= 0.8;
         }
     },
 

@@ -14,3 +14,6 @@ Thumbs.db
 *~
 .vscode/
 .idea/
+
+# Node dependencies (three.js installed locally for CDN-blocked environments)
+node_modules/

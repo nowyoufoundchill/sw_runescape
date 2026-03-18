@@ -11,8 +11,8 @@ const ThreeRenderer = {
         // ---- Scene ----
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x111111);
-        // Subtle distance fog (doesn't affect MeshBasicMaterial illumination)
-        this.scene.fog = new THREE.Fog(0x111111, 60, 140);
+        // Subtle distance fog — scaled for larger world (256 unit square)
+        this.scene.fog = new THREE.Fog(0x111111, 120, 280);
 
         const w = container.clientWidth  || 512;
         const h = container.clientHeight || 384;
