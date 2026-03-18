@@ -35,9 +35,10 @@ const Player = {
     // Score for leaderboard
     totalXP: 0,
 
-    // Sprite cache
+    // Sprite cache (idle + 2 walk frames for leg alternation)
     sprite: null,
-    spriteWalking: null,
+    spriteWalk1: null,
+    spriteWalk2: null,
 
     init(name) {
         this.name = name;
@@ -62,16 +63,11 @@ const Player = {
         this.addItem('bread', 'Bread');
         this.addItem('coins', 'Coins (25gp)');
 
-        // Generate sprite
-        this.sprite = Assets.generateCharacterSprite({
-            color: '#c00',
-            hairColor: '#4a2a0a',
-        });
-        this.spriteWalking = Assets.generateCharacterSprite({
-            color: '#c00',
-            hairColor: '#4a2a0a',
-            hasWeapon: true,
-        });
+        // Generate sprites: idle + 2 walk frames (Phase 1: #cc2200 shirt, #2244cc legs)
+        const spriteOpts = { color: '#cc2200', legsColor: '#2244cc', hairColor: '#4a2a0a' };
+        this.sprite     = Assets.generateCharacterSprite({ ...spriteOpts, walkFrame: 0 });
+        this.spriteWalk1 = Assets.generateCharacterSprite({ ...spriteOpts, walkFrame: 0 });
+        this.spriteWalk2 = Assets.generateCharacterSprite({ ...spriteOpts, walkFrame: 1 });
     },
 
     addItem(id, name) {
