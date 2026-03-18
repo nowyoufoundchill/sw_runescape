@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarWinds Quest - RuneScape Classic Tribute</title>
+    <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Login Screen -->
+        <div id="login-screen">
+            <div id="login-box">
+                <div id="login-logo">
+                    <h1>SolarWinds Quest</h1>
+                    <p class="subtitle">A RuneScape Classic Tribute</p>
+                </div>
+                <div id="login-form">
+                    <label for="username">Hero Name:</label>
+                    <input type="text" id="username" maxlength="12" placeholder="Enter your name" autocomplete="off">
+                    <button id="login-btn">Begin Adventure</button>
+                </div>
+                <div id="login-footer">
+                    <p>SolarWinds &bull; Observability &bull; Adventure</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" style="display:none;">
+            <!-- Top Bar -->
+            <div id="top-bar">
+                <div id="top-bar-left">
+                    <span id="player-name-display"></span>
+                    <span id="world-label">World 1 - Luminara</span>
+                </div>
+                <div id="top-bar-right">
+                    <span id="quest-points-display">Quest Points: 0</span>
+                    <span id="timer-display"></span>
+                </div>
+            </div>
+
+            <!-- Main Game Area -->
+            <div id="game-main">
+                <!-- Game Viewport -->
+                <canvas id="game-canvas" width="512" height="384"></canvas>
+
+                <!-- Right Panel -->
+                <div id="right-panel">
+                    <div id="panel-tabs">
+                        <button class="panel-tab active" data-panel="stats">Stats</button>
+                        <button class="panel-tab" data-panel="inventory">Inv</button>
+                        <button class="panel-tab" data-panel="quests">Quests</button>
+                        <button class="panel-tab" data-panel="map">Map</button>
+                        <button class="panel-tab" data-panel="leaderboard">Board</button>
+                    </div>
+                    <div id="panel-content">
+                        <!-- Stats Panel -->
+                        <div class="panel" id="stats-panel">
+                            <h3>Skills</h3>
+                            <div id="skills-list"></div>
+                        </div>
+                        <!-- Inventory Panel -->
+                        <div class="panel" id="inventory-panel" style="display:none;">
+                            <h3>Inventory</h3>
+                            <div id="inventory-grid"></div>
+                        </div>
+                        <!-- Quests Panel -->
+                        <div class="panel" id="quests-panel" style="display:none;">
+                            <h3>Quest Journal</h3>
+                            <div id="quest-list"></div>
+                        </div>
+                        <!-- Map Panel -->
+                        <div class="panel" id="map-panel" style="display:none;">
+                            <h3>World Map</h3>
+                            <canvas id="minimap-canvas" width="180" height="180"></canvas>
+                        </div>
+                        <!-- Leaderboard Panel -->
+                        <div class="panel" id="leaderboard-panel" style="display:none;">
+                            <h3>Leaderboard</h3>
+                            <div id="leaderboard-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Box -->
+            <div id="chat-box">
+                <div id="chat-messages"></div>
+                <div id="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="Click to chat..." autocomplete="off">
+                </div>
+            </div>
+
+            <!-- Dialogue Overlay -->
+            <div id="dialogue-overlay" style="display:none;">
+                <div id="dialogue-box">
+                    <div id="dialogue-speaker"></div>
+                    <div id="dialogue-text"></div>
+                    <div id="dialogue-options"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/assets.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/npc.js"></script>
+    <script src="js/quest.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/engine.js"></script>
+</body>
+</html>
